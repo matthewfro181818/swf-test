@@ -63,8 +63,8 @@ import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.transition.FlxTransitionableState;
 
-using StringTools;
-
 import swf.exporters.animate.AnimateLibrary;
 import openfl.utils.Assets;
+
+using StringTools;
 #end

@@ -7,6 +7,8 @@ import flixel.util.FlxDestroyUtil;
 
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
+import openfl.display.Sprite;
+import openfl.display.MovieClip;
 import haxe.Json;
 
 import backend.Song;
@@ -497,7 +499,7 @@ class Character extends FlxSprite
 	public var isSwf(default, null):Bool = false;
 	#if flxanimate
 	public var atlas:FlxAnimate;
-    var clip:MovieClip = cast sprite;
+	public var clip:MovieClip;
 	public override function draw()
 	{
 		var lastAlpha:Float = alpha;

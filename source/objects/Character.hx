@@ -12,6 +12,8 @@ import haxe.Json;
 import backend.Song;
 import states.stages.objects.TankmenBG;
 
+import flxswfsprite.FlxSwfSprite;
+
 typedef CharacterFile = {
 	var animations:Array<AnimArray>;
 	var image:String;

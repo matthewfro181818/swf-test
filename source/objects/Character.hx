@@ -7,6 +7,8 @@ import flixel.util.FlxDestroyUtil;
 
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
+import openfl.display.Sprite;
+import openfl.display.MovieClip;
 import haxe.Json;
 
 import backend.Song;
@@ -212,9 +214,9 @@ class Character extends FlxSprite
 				if(!isAnimateAtlas)
 				{
 					if(animIndices != null && animIndices.length > 0)
-						animation.addByIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+						atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 					else
-						animation.addByPrefix(animAnim, animName, animFps, animLoop);
+						atlas.anim.addBySymbol(animAnim, animName, animFps, animLoop);
 				}
 				#if flxanimate
 				else
@@ -326,6 +328,7 @@ class Character extends FlxSprite
 
 		if(!isAnimateAtlas) animation.curAnim.finish();
 		else atlas.anim.curFrame = atlas.anim.length - 1;
+		if(!isSwf) animation.curAnim.finish();
 	}
 
 	public function hasAnimation(anim:String):Bool
@@ -348,7 +351,6 @@ class Character extends FlxSprite
 			if(value) atlas.pauseAnimation();
 			else atlas.resumeAnimation();
 		}
-
 		return value;
 	}
 
@@ -386,6 +388,10 @@ class Character extends FlxSprite
 		{
 			atlas.anim.play(AnimName, Force, Reversed, Frame);
 			atlas.update(0);
+		}
+		if(!isSwf)
+		{
+			animation.play(AnimName, Force, Reversed, Frame);
 		}
 		_lastPlayedAnimation = AnimName;
 
@@ -467,8 +473,10 @@ class Character extends FlxSprite
 	// special thanks ne_eo for the references, you're the goat!!
 	@:allow(states.editors.CharacterEditorState)
 	public var isAnimateAtlas(default, null):Bool = false;
+	public var isSwf(default, null):Bool = false;
 	#if flxanimate
 	public var atlas:FlxAnimate;
+	public var clip:MovieClip;
 	public override function draw()
 	{
 		var lastAlpha:Float = alpha;
@@ -527,6 +535,24 @@ class Character extends FlxSprite
 			atlas.antialiasing = antialiasing;
 			atlas.colorTransform = colorTransform;
 			atlas.color = color;
+		}
+	}
+
+
+	public function copySwfValues()
+	{
+		@:privateAccess
+		{
+			clip.scrollFactor = scrollFactor;
+			clip.scale = scale;
+			clip.offset = offset;
+			clip.origin = origin;
+			clip.x = x;
+			clip.y = y;
+			clip.alpha = alpha;
+			clip.visible = visible;
+			clip.shader = shader;
+			clip.color = color;
 		}
 	}
 

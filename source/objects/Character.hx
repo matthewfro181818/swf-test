@@ -7,8 +7,6 @@ import flixel.util.FlxDestroyUtil;
 
 import openfl.utils.AssetType;
 import openfl.utils.Assets;
-import openfl.display.Sprite;
-import openfl.display.MovieClip;
 import haxe.Json;
 
 import backend.Song;
@@ -211,10 +209,17 @@ class Character extends FlxSprite
 				var animLoop:Bool = !!anim.loop; //Bruh
 				var animIndices:Array<Int> = anim.indices;
 
+				if(!isSwf)
+				{
+					if(animIndices != null && animIndices.length > 0)
+						clip.anim.addBySymbolIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+					else
+						clip.anim.addBySymbol(animAnim, animName, animFps, animLoop);
+				}
 				if(!isAnimateAtlas)
 				{
 					if(animIndices != null && animIndices.length > 0)
-						atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
+						atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, "", animFps, animLoop);
 					else
 						atlas.anim.addBySymbol(animAnim, animName, animFps, animLoop);
 				}
@@ -242,7 +247,7 @@ class Character extends FlxSprite
 	{
 		if(isAnimateAtlas) atlas.update(elapsed);
 
-		if(debugMode || (!isAnimateAtlas && animation.curAnim == null) || (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)))
+		if(debugMode || (!isAnimateAtlas && animation.curAnim == null) || (isAnimateAtlas && (atlas.anim.curInstance == null || atlas.anim.curSymbol == null)) || (!isSwf && animation.curAnim == null) || (isSwf && (clip.anim.curInstance == null || clip.anim.curSymbol == null))))
 		{
 			super.update(elapsed);
 			return;
@@ -308,6 +313,7 @@ class Character extends FlxSprite
 	inline public function isAnimationNull():Bool
 	{
 		return !isAnimateAtlas ? (animation.curAnim == null) : (atlas.anim.curInstance == null || atlas.anim.curSymbol == null);
+		return !isSwf ? (animation.curAnim == null) : (clip.anim.curInstance == null || clip.anim.curSymbol == null);
 	}
 
 	var _lastPlayedAnimation:String;
@@ -320,6 +326,7 @@ class Character extends FlxSprite
 	{
 		if(isAnimationNull()) return false;
 		return !isAnimateAtlas ? animation.curAnim.finished : atlas.anim.finished;
+		return !isSwf ? animation.curAnim.finished : clip.anim.finished;
 	}
 
 	public function finishAnimation():Void
@@ -329,6 +336,7 @@ class Character extends FlxSprite
 		if(!isAnimateAtlas) animation.curAnim.finish();
 		else atlas.anim.curFrame = atlas.anim.length - 1;
 		if(!isSwf) animation.curAnim.finish();
+		else clip.anim.curFrame = clip.anim.length - 1;
 	}
 
 	public function hasAnimation(anim:String):Bool
@@ -341,6 +349,7 @@ class Character extends FlxSprite
 	{
 		if(isAnimationNull()) return false;
 		return !isAnimateAtlas ? animation.curAnim.paused : atlas.anim.isPlaying;
+		return !isSwf ? animation.curAnim.paused : clip.anim.isPlaying;
 	}
 	private function set_animPaused(value:Bool):Bool
 	{
@@ -351,6 +360,13 @@ class Character extends FlxSprite
 			if(value) atlas.pauseAnimation();
 			else atlas.resumeAnimation();
 		}
+		if(!isSwf) animation.curAnim.paused = value;
+		else
+		{
+			if(value) clip.pauseAnimation();
+			else clip.resumeAnimation();
+		}
+
 		return value;
 	}
 
@@ -392,6 +408,11 @@ class Character extends FlxSprite
 		if(!isSwf)
 		{
 			animation.play(AnimName, Force, Reversed, Frame);
+		}
+		else
+		{
+			clip.anim.play(AnimName, Force, Reversed, Frame);
+			clip.update(0);
 		}
 		_lastPlayedAnimation = AnimName;
 
@@ -476,7 +497,7 @@ class Character extends FlxSprite
 	public var isSwf(default, null):Bool = false;
 	#if flxanimate
 	public var atlas:FlxAnimate;
-	public var clip:MovieClip;
+        var clip:FlxSwfSprite;
 	public override function draw()
 	{
 		var lastAlpha:Float = alpha;
@@ -493,6 +514,23 @@ class Character extends FlxSprite
 			{
 				copyAtlasValues();
 				atlas.draw();
+				alpha = lastAlpha;
+				color = lastColor;
+				if(missingCharacter && visible)
+				{
+					missingText.x = getMidpoint().x - 150;
+					missingText.y = getMidpoint().y - 10;
+					missingText.draw();
+				}
+			}
+			return;
+		}
+		if(isSwf)
+		{
+			if(clip.anim.curInstance != null)
+			{
+				copyAtlasValues();
+				clip.draw();
 				alpha = lastAlpha;
 				color = lastColor;
 				if(missingCharacter && visible)
@@ -543,19 +581,29 @@ class Character extends FlxSprite
 	{
 		@:privateAccess
 		{
-			clip.scaleX = scale.x;
-			clip.scaleY = scale.y;
+			clip.cameras = cameras;
+			clip.scrollFactor = scrollFactor;
+			clip.scale = scale;
+			clip.offset = offset;
+			clip.origin = origin;
 			clip.x = x;
 			clip.y = y;
+			clip.angle = angle;
 			clip.alpha = alpha;
 			clip.visible = visible;
+			clip.flipX = flipX;
+			clip.flipY = flipY;
 			clip.shader = shader;
+			clip.antialiasing = antialiasing;
+			clip.colorTransform = colorTransform;
+			clip.color = color;
 		}
 	}
 
 	public override function destroy()
 	{
 		atlas = FlxDestroyUtil.destroy(atlas);
+		clip = FlxDestroyUtil.destroy(clip);
 		super.destroy();
 	}
 	#end

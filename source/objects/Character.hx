@@ -545,7 +545,6 @@ class Character extends FlxSprite
 		{
 			clip.scaleX = scale.x;
 			clip.scaleY = scale.y;
-			clip.offset = offset;
 			clip.x = x;
 			clip.y = y;
 			clip.alpha = alpha;

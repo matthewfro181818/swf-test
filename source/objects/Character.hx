@@ -214,7 +214,7 @@ class Character extends FlxSprite
 				if(!isAnimateAtlas)
 				{
 					if(animIndices != null && animIndices.length > 0)
-						atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, "", animFps, animLoop);
+						atlas.anim.addBySymbolIndices(animAnim, animName, animIndices, animFps, animLoop);
 					else
 						atlas.anim.addBySymbol(animAnim, animName, animFps, animLoop);
 				}
@@ -543,16 +543,14 @@ class Character extends FlxSprite
 	{
 		@:privateAccess
 		{
-			clip.scrollFactor = scrollFactor;
-			clip.scale = scale;
+			clip.scaleX = scale.x;
+			clip.scaleY = scale.y;
 			clip.offset = offset;
-			clip.origin = origin;
 			clip.x = x;
 			clip.y = y;
 			clip.alpha = alpha;
 			clip.visible = visible;
 			clip.shader = shader;
-			clip.color = color;
 		}
 	}
 
